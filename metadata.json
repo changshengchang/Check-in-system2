@@ -1,0 +1,6 @@
+{
+  "name": "苗栗縣三義鄉公所培訓或活動簽到系統",
+  "description": "苗栗縣三義鄉公所專用培訓與活動簽到/簽退管理系統，支援數位手寫簽名、自動計算參加時數、Excel/CSV名冊比對、人事覆核與統計報表下載。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

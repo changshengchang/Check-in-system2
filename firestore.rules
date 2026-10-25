@@ -1,0 +1,78 @@
+rules_version = '2';
+
+// 三義鄉公所簽到系統 Firestore 安全規則
+// 貼到 Firebase 主控台 → Firestore → 規則 (Rules) → 發布
+//
+// 資料結構：
+//   events/{eventId}                → 活動資訊 (含開放時段) + 名冊
+//   events/{eventId}/checkIns/{id}  → 每位學員的簽到/簽退紀錄
+//
+// 注意：目前系統沒有登入機制，這份規則只限制「能寫入的位置、格式與時段」，
+// 知道網址的人仍可讀寫資料；承辦人身分也只靠 syncSource 標記辨識。
+// 正式長期使用建議再加上 Firebase Authentication。
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /events/{eventId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.eventInfo is map
+                            && request.resource.data.roster is list;
+      allow delete: if false;
+
+      match /checkIns/{checkInId} {
+        allow read: if true;
+        allow create, update: if validRecord()
+                              && (byOrganizer() || withinWindows(eventId));
+        allow delete: if true;
+      }
+    }
+
+    // 其他所有路徑一律拒絕
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ---------- 共用判斷 ----------
+
+    function validRecord() {
+      let d = request.resource.data;
+      return d.name is string
+          && d.name.size() > 0
+          && d.name.size() <= 100
+          && d.checkInTime is string;
+    }
+
+    // 承辦人後台的操作 (補登、協助簽退、覆核) 不受開放時段限制
+    function byOrganizer() {
+      return request.resource.data.get('syncSource', '') == 'organizer';
+    }
+
+    // 這次寫入是否為「送出簽到」：新建紀錄，或簽到時間被改動
+    function isCheckInSubmit() {
+      return resource == null
+          || request.resource.data.get('checkInTime', '') != resource.data.get('checkInTime', '');
+    }
+
+    // 這次寫入是否為「送出簽退」：簽退時間被設定或改動
+    function isCheckOutSubmit() {
+      let before = resource == null ? null : resource.data.get('checkOutTime', null);
+      let after = request.resource.data.get('checkOutTime', null);
+      return after != null && after != before;
+    }
+
+    // 以 Google 伺服器時間 (request.time) 判斷是否在開放時段內
+    function windowOpen(w) {
+      let now = request.time.toMillis();
+      return !(w is map)
+          || w.get('enabled', false) != true
+          || ((!(w.get('startMs', null) is number) || now >= w.startMs)
+              && (!(w.get('endMs', null) is number) || now < w.endMs));
+    }
+
+    function withinWindows(eventId) {
+      let info = get(/databases/$(database)/documents/events/$(eventId)).data.get('eventInfo', {});
+      return (!isCheckInSubmit() || windowOpen(info.get('checkInWindow', null)))
+          && (!isCheckOutSubmit() || windowOpen(info.get('checkOutWindow', null)));
+    }
+  }
+}
