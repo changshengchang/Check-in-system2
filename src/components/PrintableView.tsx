@@ -23,11 +23,28 @@ export const PrintableView: React.FC<PrintableViewProps> = ({
     window.print();
   };
 
-  const checkedInCount = attendees.filter(a => a.status === 'CHECKED_IN' || a.status === 'WALK_IN').length;
+  // 名冊資料去重：比對學員姓名與 ID，確保列印與存為 PDF 時每位學員只出現一次，絕不重複輸出
+  const uniqueAttendees = React.useMemo(() => {
+    const seenNames = new Set<string>();
+    const seenIds = new Set<string>();
+    return attendees.filter(a => {
+      if (a.id && seenIds.has(a.id)) return false;
+      const cleanName = (a.name || '').trim().toLowerCase();
+      if (cleanName && seenNames.has(cleanName)) return false;
+      if (a.id) seenIds.add(a.id);
+      if (cleanName) seenNames.add(cleanName);
+      return true;
+    });
+  }, [attendees]);
+
+  const checkedInCount = uniqueAttendees.filter(a => a.status === 'CHECKED_IN' || a.status === 'WALK_IN').length;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 backdrop-blur-xs p-4 sm:p-6 print:p-0 print:bg-white flex justify-center">
-      <div className="bg-white rounded-2xl shadow-2xl border border-slate-300 w-full max-w-6xl overflow-hidden my-auto print:border-none print:shadow-none print:w-full print:max-w-none">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 backdrop-blur-xs p-4 sm:p-6 print:p-0 print:bg-white print:static print:overflow-visible print:block flex justify-center">
+      <div
+        id="printable-document"
+        className="bg-white rounded-2xl shadow-2xl border border-slate-300 w-full max-w-6xl overflow-hidden my-auto print:border-none print:shadow-none print:w-full print:max-w-none print:my-0 print:p-0 print:rounded-none"
+      >
         {/* Header / Action bar (hidden when printing) */}
         <div className="px-6 py-4 bg-slate-100 border-b border-slate-200 flex items-center justify-between print:hidden">
           <div>
@@ -144,7 +161,7 @@ export const PrintableView: React.FC<PrintableViewProps> = ({
               <div>
                 <span className="text-slate-500">實到率：</span>
                 <span className="font-bold text-blue-700">
-                  {checkedInCount} / {attendees.length} 人
+                  {checkedInCount} / {uniqueAttendees.length} 人
                 </span>
               </div>
             </div>
@@ -198,7 +215,7 @@ export const PrintableView: React.FC<PrintableViewProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
-              {attendees.map((a, index) => {
+              {uniqueAttendees.map((a, index) => {
                 const isDone = a.status === 'CHECKED_IN' || a.status === 'WALK_IN';
                 return (
                   <tr key={a.id} className="hover:bg-slate-50/50">

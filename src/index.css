@@ -1,1 +1,53 @@
 @import "tailwindcss";
+
+@media print {
+  /* 確保列印背景色與邊框清晰保留 */
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    height: auto !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* 隱藏頁首、頁尾、控制列與所有標註 print:hidden 之元素，避免印出背景儀表板 */
+  header,
+  footer,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* 將列印彈窗從 position: fixed 改為一般自然流動區塊，防止在 PDF 每一頁重複烙印 */
+  .fixed.inset-0 {
+    position: static !important;
+    overflow: visible !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+  }
+
+  #printable-document {
+    position: static !important;
+    box-shadow: none !important;
+    border: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* 防止表格每一列在分頁時被切半截斷 */
+  tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* 跨頁列印時自動重覆表頭欄位名稱 */
+  thead {
+    display: table-header-group !important;
+  }
+}
