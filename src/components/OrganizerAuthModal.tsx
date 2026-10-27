@@ -7,25 +7,26 @@ interface OrganizerAuthModalProps {
   isOpen: boolean;
   onSuccess: (role: StaffRole) => void;
   onClose: () => void;
+  helperPassword?: string;
 }
 
 /**
- * 承辦人：完整管理權限；協助人員：只能查詢與簽到/簽退覆核。
- * 注意：密碼寫在前端程式中，權限只在畫面上限制。
+ * 承辦人：完整管理權限 (固定密碼 nick620504)
+ * 協助人員：只能查詢與簽到/簽退覆核 (預設 user1234，承辦人可於後台自訂)
  */
-const ROLE_PASSWORDS: Record<string, StaffRole> = {
-  nick620504: 'organizer',
-  user1234: 'helper'
-};
-
-export function roleForPassword(password: string): StaffRole | null {
-  return Object.prototype.hasOwnProperty.call(ROLE_PASSWORDS, password) ? ROLE_PASSWORDS[password] : null;
+export function roleForPassword(password: string, helperPassword?: string): StaffRole | null {
+  const trimmed = password.trim();
+  if (trimmed === 'nick620504') return 'organizer';
+  const activeHelper = (helperPassword || 'user1234').trim();
+  if (trimmed === activeHelper) return 'helper';
+  return null;
 }
 
 export const OrganizerAuthModal: React.FC<OrganizerAuthModalProps> = ({
   isOpen,
   onSuccess,
-  onClose
+  onClose,
+  helperPassword
 }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -35,7 +36,7 @@ export const OrganizerAuthModal: React.FC<OrganizerAuthModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const role = roleForPassword(password);
+    const role = roleForPassword(password, helperPassword);
     if (role) {
       setError(false);
       setPassword('');

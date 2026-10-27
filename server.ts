@@ -24,7 +24,8 @@ const DEFAULT_EVENT_INFO = {
   time: '09:00 - 16:30',
   location: '公所 3F 大禮堂 / 多功能研討室',
   organizer: '苗栗縣三義鄉公所',
-  notes: '請準時出席，並記得於簽到及簽退時完成電子手寫簽名與人事覆核'
+  notes: '請準時出席，並記得於簽到及簽退時完成電子手寫簽名與人事覆核',
+  helperPassword: 'user1234'
 };
 
 const DEFAULT_ROSTER = [

@@ -872,6 +872,7 @@ export default function App() {
         isOpen={showAuthModal}
         onSuccess={handleAuthSuccess}
         onClose={() => setShowAuthModal(false)}
+        helperPassword={eventInfo.helperPassword}
       />
     </div>
   );

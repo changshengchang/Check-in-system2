@@ -19,7 +19,8 @@ export const DEFAULT_EVENT_INFO: EventInfo = {
   defaultDeductionMinutes: 60,
   deductionReason: '午休用餐休息時間不計入補休',
   completionDisplayFields: ['職稱', '部門', '電話'],
-  availableRosterColumns: ['姓名', '職稱', '部門', '電話', '電子信箱']
+  availableRosterColumns: ['姓名', '職稱', '部門', '電話', '電子信箱'],
+  helperPassword: 'user1234'
 };
 
 /**

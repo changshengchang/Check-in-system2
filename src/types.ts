@@ -21,6 +21,8 @@ export interface EventInfo {
   checkOutWindow?: SubmitWindow;
   // 簽到覆核期限 (分鐘)：學員自行簽到後須在期限內完成簽到覆核，逾時自動作廢；0 = 不作廢，未設定 = 15
   verifyTimeoutMinutes?: number;
+  // 現場協助人員密碼 (預設 user1234，承辦人可於後台自行查看與修改)
+  helperPassword?: string;
 }
 
 export interface SubmitWindow {
