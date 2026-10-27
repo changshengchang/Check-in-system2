@@ -316,9 +316,14 @@ export const CheckOutForm: React.FC<CheckOutFormProps> = ({
       {/* Event Info Card Banner - Warm Amber / Sunset Orange Theme */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-700 via-orange-800 to-amber-950 text-white p-6 mb-6 shadow-lg border-t-4 border-amber-400">
         <div className="relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/30 text-amber-100 border border-amber-400/30 text-xs font-bold mb-2">
-            <span className="w-2 h-2 rounded-full bg-amber-300 animate-pulse" />
-            <span>【學員簽退端 · 離席登記與時數結算專區】</span>
+          <div className="flex items-center justify-between gap-3 mb-2 flex-wrap">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/30 text-amber-100 border border-amber-400/30 text-xs font-bold">
+              <span className="w-2 h-2 rounded-full bg-amber-300 animate-pulse" />
+              <span>【學員簽退端 · 離席登記與時數結算專區】</span>
+            </div>
+            <div className="text-xs font-medium text-amber-100/90 bg-amber-950/40 px-3 py-1 rounded-full border border-amber-400/30 backdrop-blur-xs shadow-xs">
+              系統設計者：詹昇鎮
+            </div>
           </div>
 
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight mb-2 text-white">

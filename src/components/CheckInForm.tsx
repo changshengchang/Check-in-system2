@@ -274,12 +274,16 @@ export const CheckInForm: React.FC<CheckInFormProps> = ({
 
   return (
     <div className="max-w-4xl mx-auto py-6 px-4 sm:px-6">
-      {/* Event Info Card Banner - Ocean Blue Theme */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-900 text-white p-6 mb-6 shadow-lg border-t-4 border-blue-400">
         <div className="relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/30 text-blue-100 border border-blue-400/30 text-xs font-bold mb-2">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-            <span>【學員簽到端 · 入場報到專區】</span>
+          <div className="flex items-center justify-between gap-3 mb-2 flex-wrap">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/30 text-blue-100 border border-blue-400/30 text-xs font-bold">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+              <span>【學員簽到端 · 入場報到專區】</span>
+            </div>
+            <div className="text-xs font-medium text-blue-100/90 bg-blue-950/40 px-3 py-1 rounded-full border border-blue-400/30 backdrop-blur-xs shadow-xs">
+              系統設計者：詹昇鎮
+            </div>
           </div>
 
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight mb-2 text-white">

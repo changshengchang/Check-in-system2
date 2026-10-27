@@ -35,10 +35,11 @@ const firebaseConfig = {
 
 /**
  * 同一個 Firebase 專案內的活動代號，所有裝置必須相同才會互相同步。
- * 統一預設使用 sanyi-main，確保 Google AI Studio 與 Vercel 正式站兩端資料完全一致並即時互通。
- * 若日後需獨立開新活動或測試房間，可透過 VITE_FIREBASE_EVENT_ID 環境變數自訂。
+ * 正式網站用 sanyi-main；Vercel 預覽網址與本機開發用 sanyi-preview，
+ * 測試時產生的資料不會混進正式活動。(VITE_VERCEL_ENV 由 Vercel 自動提供)
  */
-export const EVENT_ID: string = env.VITE_FIREBASE_EVENT_ID || 'sanyi-main';
+const isPreview = env.DEV || env.VITE_VERCEL_ENV === 'preview' || env.VITE_VERCEL_ENV === 'development';
+export const EVENT_ID: string = env.VITE_FIREBASE_EVENT_ID || (isPreview ? 'sanyi-preview' : 'sanyi-main');
 
 const app = initializeApp(firebaseConfig);
 
@@ -235,34 +236,11 @@ export async function ensureEventSeeded(getSeed: () => Promise<EventDocData & { 
   const existing = await getDocFromServer(eventDocRef).catch(() => null);
   if (!existing || existing.exists()) return false;
 
-  // 若當前活動為 sanyi-main 且尚未初始化，優先嘗試從 sanyi-preview 繼承既有活動名冊與簽到
-  let inheritedSeed: (EventDocData & { checkIns: CheckInRecord[] }) | null = null;
-  if (EVENT_ID === 'sanyi-main') {
-    try {
-      const previewSnap = await getDocFromServer(doc(db, 'events', 'sanyi-preview')).catch(() => null);
-      if (previewSnap && previewSnap.exists()) {
-        const pData = previewSnap.data() as EventDocData;
-        const pCheckInsSnap = await getDocs(collection(db, 'events', 'sanyi-preview', 'checkIns')).catch(() => null);
-        const pCheckIns = pCheckInsSnap ? pCheckInsSnap.docs.map(d => ({ ...(d.data() as CheckInRecord), id: d.id })) : [];
-        if (pData.eventInfo && Array.isArray(pData.roster)) {
-          inheritedSeed = {
-            eventInfo: pData.eventInfo,
-            roster: pData.roster,
-            lastSerialNo: pData.lastSerialNo,
-            checkIns: pCheckIns
-          };
-        }
-      }
-    } catch {
-      // 略過錯誤，退回標準 seed
-    }
-  }
-
-  const seed = inheritedSeed || (await getSeed());
+  const seed = await getSeed();
   const created = await runTransaction(db, async tx => {
     const snap = await tx.get(eventDocRef);
     if (snap.exists()) return false;
-    const numbered = assignRosterSerials(seed.roster, seed.lastSerialNo);
+    const numbered = assignRosterSerials(seed.roster);
     tx.set(eventDocRef, {
       eventInfo: seed.eventInfo,
       roster: numbered.roster,
@@ -275,7 +253,7 @@ export async function ensureEventSeeded(getSeed: () => Promise<EventDocData & { 
   if (created && seed.checkIns.length > 0) {
     const batch = writeBatch(db);
     seed.checkIns.slice(0, 450).forEach(c => {
-      batch.set(checkInDocRef(c.id), { ...c, ...syncMeta('初始化簽到紀錄', 'organizer') });
+      batch.set(checkInDocRef(c.id), { ...c, ...syncMeta('匯入舊系統簽到紀錄', 'organizer') });
     });
     await batch.commit();
   }
